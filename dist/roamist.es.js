@@ -5605,7 +5605,7 @@ const createTodoistTaskString = ({
   intent = "inbox";
   if (colonIndex > -1) {
     intent = taskString.substring(0, colonIndex);
-    taskString = taskString.substring(colonIndex + 1);
+    taskString = taskString.substring(colonIndex + 2);
   }
   console.log(project.name);
   const whitelistMap = window.WHITELIST_MAP || {};
