@@ -74,10 +74,17 @@ export const pullTasks = async ({
     }
 
     const project = getTodoistProject(projects, task.projectId);
+    const { formattedIntent, taskString } = createTodoistTaskString({ task, project });
     currentBlockUid = await roam42.common.createSiblingBlock(
       currentBlockUid,
-      createTodoistTaskString({ task, project }),
+      formattedIntent,
       true
+    );
+
+    currentBlockUid = await roam42.common.createBlock(
+      currentBlockUid,
+      2,
+      taskString,
     );
 
     // add description
@@ -85,7 +92,7 @@ export const pullTasks = async ({
       await createDescriptionBlock({
         description: task.description,
         currentBlockUid: currentBlockUid,
-        currentIndent: 1,
+        currentIndent: 2,
       });
     }
 
