@@ -89,14 +89,16 @@ export const createTodoistTaskString = ({
 
   let taskString = `${getParsedContent(task.content)}`;
   const colonIndex = taskString.indexOf(': ')
-  const intent = taskString.substring(0, colonIndex);
-  taskString = taskString.substring((colonIndex + 2) || 0)
-  console.log('intent', intent);
-  console.log('taskString', taskString);
+  let intent;
+  intent = 'inbox';
+  if (colonIndex > -1) {
+    intent = taskString.substring(0, colonIndex);
+    taskString = taskString.substring(colonIndex + 1);
+  }
   console.log(project.name);
 
   const whitelistMap = (window.WHITELIST_MAP || {});
-  const formattedIntent = whitelistMap[(intent && intent.toLowerCase()) || 'inbox'] + ' ';
+  const formattedIntent = (whitelistMap[(intent && intent.toLowerCase()) || 'inbox'] || whitelistMap['inbox']) + ' ';
 
   return {
     formattedIntent,
