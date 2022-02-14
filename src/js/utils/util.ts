@@ -88,13 +88,22 @@ export const createTodoistTaskString = ({
   }
 
   let taskString = `${getParsedContent(task.content)}`;
-  const intent = taskString.substring(0, taskString.indexOf(':'));
+  const colonIndex = taskString.indexOf(': ')
+  const intent = taskString.substring(0, colonIndex);
+  taskString = taskString.substring((colonIndex + 2) || 0)
+  console.log('intent', intent);
+  console.log('taskString', taskString);
   console.log(project.name);
 
   const whitelistMap = (window.WHITELIST_MAP || {});
   const formattedIntent = whitelistMap[(intent && intent.toLowerCase()) || 'inbox'] + ' ';
 
-  return `[[${formattedIntent}]] ${taskString}`;
+  return {
+    formattedIntent,
+    taskString,
+  }
+
+  // return `[[${formattedIntent}]] ${taskString}`;
 
   // let taskString = `${getParsedContent(task.content)} [🔗](${
   //   task.url
