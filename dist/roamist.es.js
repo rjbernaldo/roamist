@@ -5675,50 +5675,39 @@ const pullTasks = async ({
   taskList.sort((a, b) => {
     return b.priority - a.priority;
   });
-  const subTaskList = tasks.filter((task) => task.parent_id);
   const cursorBlockUid = roam42.common.currentActiveBlockUID();
   let currentBlockUid = cursorBlockUid;
+  const taskCollection = {};
   for (const [taskIndex, task] of taskList.entries()) {
-    try {
-      await api$1.closeTask(task.id);
-    } catch (err) {
-      console.log(`api.closeTask(${task.id}):err`, err);
-    }
+    console.log(taskIndex);
     const project = getTodoistProject(projects, task.projectId);
     const { formattedIntent, taskString } = createTodoistTaskString({ task, project });
-    currentBlockUid = await roam42.common.createSiblingBlock(currentBlockUid, formattedIntent, true);
-    currentBlockUid = await roam42.common.createBlock(currentBlockUid, 2, taskString);
-    if (task.description) {
-      await createDescriptionBlock({
-        description: task.description,
-        currentBlockUid,
-        currentIndent: 2
-      });
+    if (!taskCollection[formattedIntent]) {
+      taskCollection[formattedIntent] = [];
     }
-    const subtasks = subTaskList.filter((subtask) => subtask.parent_id === task.id);
-    let currentSubBlockUid;
-    for (const [subtaskIndex, subtask] of subtasks.entries()) {
-      if (subtaskIndex === 0) {
-        currentSubBlockUid = await roam42.common.createBlock(currentBlockUid, 1, createTodoistTaskString({
-          task: subtask,
-          project
-        }));
+    taskCollection[formattedIntent].push({
+      task,
+      taskString
+    });
+  }
+  for (const taskIntent of Object.keys(taskCollection)) {
+    currentBlockUid = await roam42.common.createSiblingBlock(currentBlockUid, taskIntent, true);
+    let taskBlockUid;
+    for (const [taskIndex, taskData] of taskCollection[taskIntent].entries()) {
+      const { taskString, task } = taskData;
+      if (taskIndex === 0) {
+        taskBlockUid = await roam42.common.createBlock(currentBlockUid, 2, taskString);
       } else {
-        currentSubBlockUid = await roam42.common.createSiblingBlock(currentSubBlockUid, createTodoistTaskString({
-          task: subtask,
-          project
-        }), true);
+        taskBlockUid = await roam42.common.createSiblingBlock(taskBlockUid, taskString);
       }
-      if (subtask.description) {
+      if (task.description) {
         await createDescriptionBlock({
-          description: subtask.description,
-          currentBlockUid: currentSubBlockUid,
+          description: task.description,
+          currentBlockUid,
           currentIndent: 2
         });
       }
-    }
-    if (taskIndex === 0) {
-      await roam42.common.deleteBlock(cursorBlockUid);
+      await api$1.closeTask(task.id);
     }
   }
   return "";
