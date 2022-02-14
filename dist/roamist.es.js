@@ -5599,42 +5599,18 @@ const createTodoistTaskString = ({
     }
   }
   let taskString = `${getParsedContent(task.content)}`;
-  const intent = taskString.substring(0, taskString.indexOf(":"));
-  const whitelistMap = {
-    [project.name]: "P/Inbox::",
-    inbox: "P/Inbox::",
-    thoughts: "A/Thoughts::",
-    happiness: "P/Happiness::",
-    dreaming: "P/Dream Life::",
-    cryptotodo: "P/Crypto Dailies::",
-    writing: "P/Writing (The Great Online Game, Hopium Dealer, Financial Journalist)::",
-    basb: "P/BASB::",
-    spooky: "P/SpookySwap::",
-    ncase: "P/Ncase M1::",
-    gamedev: "P/Mr Autofire::",
-    swimming: "P/Open Water Swimming::",
-    blueshyft: "P/blueshyft::",
-    health: "P/Health::",
-    investing: "P/Investing::",
-    crypto: "P/Investing::",
-    ideas: "P/Ideas::",
-    forging: "P/Forging::",
-    coinfu: "P/coinfu.io::",
-    decisions: "A/Decisions::",
-    incentives: "A/Incentives::",
-    gaming: "A/Gaming::",
-    gameanxiety: "P/Fight Video Game Backlog Anxiety::",
-    software: "A/Buoy Software Solutions::",
-    tech: "A/Tinkering::",
-    books: "A/Books::",
-    house: "R/Dream House::",
-    porsche: "R/Porsche 911::",
-    coffee: "R/Barista::",
-    tv: "R/TV Adventures::",
-    finance: "R/Finance::"
-  };
+  const colonIndex = taskString.indexOf(": ");
+  const intent = taskString.substring(0, colonIndex);
+  taskString = taskString.substring(colonIndex + 2 || 0);
+  console.log("intent", intent);
+  console.log("taskString", taskString);
+  console.log(project.name);
+  const whitelistMap = window.WHITELIST_MAP || {};
   const formattedIntent = whitelistMap[intent && intent.toLowerCase() || "inbox"] + " ";
-  return `[[${formattedIntent}]] ${taskString}`;
+  return {
+    formattedIntent,
+    taskString
+  };
 };
 const getAllTodoistBlocksFromPageTitle = async (pageTitle) => {
   const rule = "[[(ancestor ?b ?a)[?a :block/children ?b]][(ancestor ?b ?a)[?parent :block/children ?b ](ancestor ?parent ?a) ]]";
@@ -5709,12 +5685,14 @@ const pullTasks = async ({
       console.log(`api.closeTask(${task.id}):err`, err);
     }
     const project = getTodoistProject(projects, task.projectId);
-    currentBlockUid = await roam42.common.createSiblingBlock(currentBlockUid, createTodoistTaskString({ task, project }), true);
+    const { formattedIntent, taskString } = createTodoistTaskString({ task, project });
+    currentBlockUid = await roam42.common.createSiblingBlock(currentBlockUid, formattedIntent, true);
+    currentBlockUid = await roam42.common.createBlock(currentBlockUid, 2, taskString);
     if (task.description) {
       await createDescriptionBlock({
         description: task.description,
         currentBlockUid,
-        currentIndent: 1
+        currentIndent: 2
       });
     }
     const subtasks = subTaskList.filter((subtask) => subtask.parent_id === task.id);
