@@ -99,7 +99,7 @@ export const createTodoistTaskString = ({
   console.log(project.name);
 
   const whitelistMap = (window.WHITELIST_MAP || {});
-  const formattedIntent = (whitelistMap[(intent && intent.toLowerCase()) || 'inbox'] || whitelistMap['inbox']);
+  const formattedIntent = (whitelistMap[intent.toLowerCase()] || whitelistMap['inbox']);
   console.log('intent', intent);
   console.log('formattedIntent', formattedIntent);
 
