@@ -5709,7 +5709,7 @@ const pullTasks = async ({
         await createDescriptionBlock({
           description: task.description,
           currentBlockUid,
-          currentIndent: 2
+          currentIndent: 3
         });
       }
       await api$1.closeTask(task.id);
