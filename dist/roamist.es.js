@@ -5708,7 +5708,7 @@ const pullTasks = async ({
       if (task.description) {
         await createDescriptionBlock({
           description: task.description,
-          currentBlockUid,
+          currentBlockUid: taskBlockUid,
           currentIndent: 3
         });
       }

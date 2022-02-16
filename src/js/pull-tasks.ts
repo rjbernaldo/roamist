@@ -109,7 +109,7 @@ export const pullTasks = async ({
       if (task.description) {
         await createDescriptionBlock({
           description: task.description,
-          currentBlockUid: currentBlockUid,
+          currentBlockUid: taskBlockUid,
           currentIndent: 3,
         });
       }
