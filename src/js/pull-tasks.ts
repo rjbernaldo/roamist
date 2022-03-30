@@ -6,7 +6,7 @@ const api = new TodoistApi(window.TODOIST_TOKEN);
 import {
   createTodoistTaskString,
   dedupTaskList,
-  getTodoistProject,
+  // getTodoistProject,
 } from "./utils/util";
 
 export const pullTasks = async ({
@@ -53,7 +53,7 @@ export const pullTasks = async ({
     }
   };
 
-  const projects = await api.getProjects();
+  // const projects = await api.getProjects();
   const tasks = await api.getTasks({ filter: todoistFilter });
   let taskList = tasks.filter((task: any) => !task.parent_id);
   if (onlyDiff) {
@@ -70,12 +70,12 @@ export const pullTasks = async ({
   const taskCollection: any = {};
   for (const [taskIndex, task] of taskList.entries()) {
     console.log(taskIndex);
-    const project = getTodoistProject(projects, task.projectId);
+    // const project = getTodoistProject(projects, task.projectId);
     const {
       formattedIntent,
       taskString,
       createdString,
-    } = createTodoistTaskString({ task, project });
+    } = createTodoistTaskString({ task });
 
     if (!taskCollection[createdString]) {
       taskCollection[createdString] = {};

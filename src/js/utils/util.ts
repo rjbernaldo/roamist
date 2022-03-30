@@ -49,10 +49,10 @@ export const getTodoistId = (url: string) => {
 
 export const createTodoistTaskString = ({
   task,
-  project,
+  // project,
 }: {
   task: any;
-  project: any;
+  // project: any;
 }) => {
   function getParsedContent(content: string) {
     const matchedLink = content.match(/\[(.*)\]\((.*)\)/);
@@ -89,7 +89,6 @@ export const createTodoistTaskString = ({
   }
 
   let taskString = `${getParsedContent(task.content)}`;
-  console.log('taskString', taskString);
   const colonIndex = taskString.indexOf(': ')
   let intent;
   intent = 'inbox';
