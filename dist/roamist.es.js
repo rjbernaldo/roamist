@@ -9297,9 +9297,20 @@ const createTodoistTaskString = ({
   const formattedIntent = whitelistMap[intent.toLowerCase()] || whitelistMap["inbox"];
   const createdString = hooks(task.created).format("MMMM Do, YYYY");
   const createdTime = hooks(task.created).format("HH:mm");
+  const bracketize = (str) => {
+    const whitelist = ["$", "@"];
+    return str.split(" ").map((word) => {
+      const firstLetter = word.slice(0, 1);
+      if (whitelist.indexOf(firstLetter) === -1)
+        return word;
+      if (firstLetter === "$")
+        word = word.toUpperCase();
+      return `[[${word}]]`;
+    }).join(" ");
+  };
   return {
     formattedIntent,
-    taskString: `${createdTime} ${taskString}`,
+    taskString: `${createdTime} ${bracketize(taskString)}`,
     createdString
   };
 };
@@ -9381,7 +9392,7 @@ const pullTasks = async ({
     });
   }
   for (const createdString of Object.keys(taskCollection)) {
-    currentBlockUid = await roam42.common.createSiblingBlock(currentBlockUid, createdString, true);
+    currentBlockUid = await roam42.common.createSiblingBlock(currentBlockUid, `[[${createdString}]]`, true);
     let firstBlock = true;
     let intentBlockUid;
     for (const taskIntent of Object.keys(taskCollection[createdString])) {
@@ -9392,7 +9403,7 @@ const pullTasks = async ({
         intentBlockUid = await roam42.common.createSiblingBlock(intentBlockUid, taskIntent, true);
       }
       let taskBlockUid;
-      for (const [taskIndex, taskData] of taskCollection[taskIntent].entries()) {
+      for (const [taskIndex, taskData] of taskCollection[createdString][taskIntent].entries()) {
         const { taskString, task } = taskData;
         if (taskIndex === 0) {
           taskBlockUid = await roam42.common.createBlock(intentBlockUid, 3, taskString);

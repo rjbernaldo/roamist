@@ -94,7 +94,7 @@ export const pullTasks = async ({
     // create taskIntent block
     currentBlockUid = await roam42.common.createSiblingBlock(
       currentBlockUid,
-      createdString,
+      `[[${createdString}]]`,
       true,
     )
 
@@ -119,7 +119,7 @@ export const pullTasks = async ({
 
       // create task block
       let taskBlockUid;
-      for (const [taskIndex, taskData] of taskCollection[taskIntent].entries()) {
+      for (const [taskIndex, taskData] of taskCollection[createdString][taskIntent].entries()) {
         const { taskString, task } = taskData;
         if (taskIndex === 0) {
           taskBlockUid = await roam42.common.createBlock(
