@@ -71,51 +71,79 @@ export const pullTasks = async ({
   for (const [taskIndex, task] of taskList.entries()) {
     console.log(taskIndex);
     const project = getTodoistProject(projects, task.projectId);
-    const { formattedIntent, taskString } = createTodoistTaskString({ task, project });
+    const {
+      formattedIntent,
+      taskString,
+      createdString,
+    } = createTodoistTaskString({ task, project });
 
-    if (!taskCollection[formattedIntent]) {
-      taskCollection[formattedIntent] = [];
+    if (!taskCollection[createdString]) {
+      taskCollection[createdString] = {};
+    }
+    if (!taskCollection[createdString][formattedIntent]) {
+      taskCollection[createdString][formattedIntent] = [];
     }
 
-    taskCollection[formattedIntent].push({
+    taskCollection[createdString][formattedIntent].push({
       task,
       taskString,
     });
   }
 
-  for (const taskIntent of Object.keys(taskCollection)) {
+  for (const createdString of Object.keys(taskCollection)) {
     // create taskIntent block
     currentBlockUid = await roam42.common.createSiblingBlock(
       currentBlockUid,
-      taskIntent,
+      createdString,
       true,
     )
-    // create task block
-    let taskBlockUid;
-    for (const [taskIndex, taskData] of taskCollection[taskIntent].entries()) {
-      const { taskString, task } = taskData;
-      if (taskIndex === 0) {
-        taskBlockUid = await roam42.common.createBlock(
+
+    let firstBlock = true;
+    let intentBlockUid;
+    for (const taskIntent of Object.keys(taskCollection[createdString])) {
+      // create taskIntent block
+      if (firstBlock) {
+        firstBlock = false;
+        intentBlockUid = await roam42.common.createBlock(
           currentBlockUid,
           2,
-          taskString,
+          taskIntent,
         );
       } else {
-        taskBlockUid = await roam42.common.createSiblingBlock(
-          taskBlockUid,
-          taskString
-        );
+        intentBlockUid = await roam42.common.createSiblingBlock(
+          intentBlockUid,
+          taskIntent,
+          true,
+        )
       }
-      if (task.description) {
-        await createDescriptionBlock({
-          description: task.description,
-          currentBlockUid: taskBlockUid,
-          currentIndent: 3,
-        });
+
+      // create task block
+      let taskBlockUid;
+      for (const [taskIndex, taskData] of taskCollection[taskIntent].entries()) {
+        const { taskString, task } = taskData;
+        if (taskIndex === 0) {
+          taskBlockUid = await roam42.common.createBlock(
+            intentBlockUid,
+            3,
+            taskString,
+          );
+        } else {
+          taskBlockUid = await roam42.common.createSiblingBlock(
+            taskBlockUid,
+            taskString
+          );
+        }
+        if (task.description) {
+          await createDescriptionBlock({
+            description: task.description,
+            currentBlockUid: taskBlockUid,
+            currentIndent: 4,
+          });
+        }
+        await api.closeTask(task.id);
       }
-      await api.closeTask(task.id);
+      // close task
     }
-    // close task
   }
 
   // for (const [taskIndex, task] of taskList.entries()) {

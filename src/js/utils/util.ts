@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { TodoistApi } from "@doist/todoist-api-typescript";
+import moment from 'moment'
 
 const api = new TodoistApi(window.TODOIST_TOKEN);
 
@@ -96,16 +97,17 @@ export const createTodoistTaskString = ({
     intent = taskString.substring(0, colonIndex);
     taskString = taskString.substring(colonIndex + 2);
   }
-  console.log(project.name);
 
   const whitelistMap = (window.WHITELIST_MAP || {});
   const formattedIntent = (whitelistMap[intent.toLowerCase()] || whitelistMap['inbox']);
-  console.log('intent', intent);
-  console.log('formattedIntent', formattedIntent);
+
+  const createdString = moment(task.created).format('MMMM Do, YYYY');
+  const createdTime = moment(task.created).format('HH:mm');
 
   return {
     formattedIntent,
-    taskString,
+    taskString: `${createdTime} ${taskString}`,
+    createdString,
   }
 
   // return `[[${formattedIntent}]] ${taskString}`;
