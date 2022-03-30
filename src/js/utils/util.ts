@@ -104,12 +104,12 @@ export const createTodoistTaskString = ({
   const createdTime = moment(task.created).format('HH:mm');
 
   const bracketize = (str: string) => {
-    const whitelist = ['$', '@'];
+    const whitelist = ['$', '@', '[['];
     return str.split(' ').map((word: string) => {
       const firstLetter = word.slice(0, 1);
       if (whitelist.indexOf(firstLetter) === -1) return word;
       if (firstLetter === '$') word = word.toUpperCase()
-      return `[[${word}]]`;
+      return `[[${word.replace('[[', '').replace(']]', '')}]]`;
     }).join(' ');
   }
 
